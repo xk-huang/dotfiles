@@ -1,0 +1,46 @@
+[user]
+    name = Xiaoke Huang
+    email = xiaokehuang@foxmail.com
+
+[init]
+    defaultBranch = main
+
+[alias]
+        lg1 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+        lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+        lg = !"git lg1"
+        co = checkout
+        br = branch
+        ci = commit
+        st = status
+        unstage = reset HEAD --
+        last = log -1 HEAD
+        logl = log --oneline
+[core]
+        fileMode = false
+
+# Use delta for git diff. https://github.com/hamvocke/dotfiles/tree/master/git
+# On Ubuntu 20.04.3 LTS, install older version like 0.15.1.
+# https://github.com/dandavison/delta/issues/1250#issuecomment-1336536675
+# curl -LO https://github.com/dandavison/delta/releases/download/0.15.1/git-delta-musl_0.15.1_amd64.deb
+# sudo dpkg -i git-delta-musl_0.15.1_amd64.deb
+
+
+[core]
+    pager = delta
+
+[interactive]
+    diffFilter = delta --color-only
+
+[delta]
+    navigate = true    # use n and N to move between diff sections
+
+    # delta detects terminal colors automatically; set one of these to disable auto-detection
+    # dark = true
+    # light = true
+
+[merge]
+    conflictstyle = diff3
+
+[diff]
+    colorMoved = default

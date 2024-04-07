@@ -1,0 +1,96 @@
+#! /bin/bash
+
+# Check if zsh is installed
+if ! command -v zsh &> /dev/null; then
+    # If not installed, install zsh using apt-get
+    if ! command -v sudo; then
+        apt-get update
+        apt-get install -y zsh
+    else
+        sudo apt-get update
+        sudo apt-get install -y zsh
+    fi
+else
+    echo "zsh is already installed"
+fi
+
+# Install git-delta for better diff
+# Install older version. See https://github.com/xk-huang/dotfiles/blob/main/git/.gitconfig
+if ! command -v delta; then
+    curl -L -o /tmp/git-delta-musl_0.15.1_amd64.deb https://github.com/dandavison/delta/releases/download/0.15.1/git-delta-musl_0.15.1_amd64.deb 
+    if ! command -v sudo; then
+        dpkg -i /tmp/git-delta-musl_0.15.1_amd64.deb
+    else
+        sudo dpkg -i /tmp/git-delta-musl_0.15.1_amd64.deb
+    fi
+    rm /tmp/git-delta-musl_0.15.1_amd64.deb
+fi
+
+# Download oh-my-zsh
+yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+# Replace them to p10k
+cp ~/.zshrc ~/.zshrc."$(date +"%y%m%d-%H%M%S")".bak
+sed -i 's/^ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
+
+# Replace plugins=(git) to my custom plugins
+sed -i.bak 's/^plugins=(\(.*\))/plugins=(git zsh-autosuggestions zsh-syntax-highlighting z alias-tips aliases ag history tmux)/' ~/.zshrc
+git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+git clone --depth=1 https://github.com/djui/alias-tips.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/alias-tips
+
+# Add custom config for .zshrc. Mind the escaped $ and `.
+search_string="# 240407 Update .zshrc"
+if ! grep -q "$search_string" ~/.zshrc; then
+cat >> ~/.zshrc << EOF
+# 240407 Update .zshrc
+########################
+alias a3='conda activate'
+alias c3='conda'
+alias sc='source'
+
+export VISUAL=vim
+export EDITOR="\$VISUAL"
+export PATH="\$PATH:\$HOME/.local/bin"
+
+# export PATH=/usr/local/cuda/bin/:\$PATH  # to compile cuda ext
+# To customize prompt, run "p10k configure" or edit ~/.p10k.zsh.
+
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+########################
+EOF
+fi
+
+# Change .bash_profile, change default shell to zsh without root permit
+# https://unix.stackexchange.com/questions/136423/making-zsh-default-shell-without-root-access
+
+[[ ! -f ~/.bash_profile ]] || cp ~/.bash_profile ~/.bash_profile."$(date +"%y%m%d-%H%M%S")".bak
+search_string="# 240407 Update .bash_profile"
+if [[ ! -f ~/.bash_profile ]] || ! grep -q "$search_string" ~/.bash_profile; then
+cat >> ~/.bash_profile <<EOF
+# 240407 Update .bash_profile
+###############################
+export SHELL=$(which zsh)
+exec $(which zsh) -l
+###############################
+EOF
+fi
+
+# Download .tmux.conf
+if [[ ! -f ~/.tmux.conf ]]; then
+        curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/tmux/.tmux.conf -o - >> ~/.tmux.conf
+    fi
+
+# Download .gitconfig
+if [[ ! -f ~/.gitconfig ]]; then
+    curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/git/.gitconfig -o - >> ~/.gitconfig
+fi
+
+# Download .p10k.zsh
+if [[ ! -f ~/.p10k.zsh ]]; then
+    curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/p10k/.p10k.zsh -o - >> ~/.p10k.zsh
+fi
+
+# Download VLAA
+# curl -L https://raw.githubusercontent.com/xk-huang/dotfiles_insider/main/ssh/config-ucsc_vlaa?token=GHSAT0AAAAAACKZB63U4J5YHQGP5E3HTMCKZQSTSOA -o - >> ~/.ssh/config
