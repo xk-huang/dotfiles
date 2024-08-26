@@ -92,5 +92,10 @@ if [[ ! -f ~/.p10k.zsh ]]; then
     curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/p10k/.p10k.zsh -o - >> ~/.p10k.zsh
 fi
 
-# Download VLAA
-# curl -L https://raw.githubusercontent.com/xk-huang/dotfiles_insider/main/ssh/config-ucsc_vlaa?token=GHSAT0AAAAAACKZB63U4J5YHQGP5E3HTMCKZQSTSOA -o - >> ~/.ssh/config
+git clone git@github.com:xk-huang/dotfiles.git ~/dotfiles
+
+if [[ ! -d ~/.config/nvim ]]; then
+    mkdir -p ~/.config/
+    cp -r ~/dotfiles/nvim ~/.config/
+fi
+
