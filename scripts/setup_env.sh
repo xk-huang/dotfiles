@@ -53,6 +53,7 @@ alias sc='source'
 export VISUAL=vim
 export EDITOR="\$VISUAL"
 export PATH="\$PATH:\$HOME/.local/bin"
+export PATH="\$PATH:\$HOME/local/usr/bin"
 
 # export PATH=/usr/local/cuda/bin/:\$PATH  # to compile cuda ext
 # To customize prompt, run "p10k configure" or edit ~/.p10k.zsh.
@@ -76,6 +77,11 @@ exec $(which zsh) -l
 ###############################
 EOF
 fi
+
+# Install delta-pager
+wget https://github.com/dandavison/delta/releases/download/0.18.2/git-delta_0.18.2_amd64.deb
+dpkg-deb -x git-delta_0.18.2_amd64.deb ~/local
+rm git-delta_0.18.2_amd64.deb
 
 # Download .tmux.conf
 if [[ ! -f ~/.tmux.conf ]]; then
