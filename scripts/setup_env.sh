@@ -105,3 +105,14 @@ if [[ ! -d ~/.config/nvim ]]; then
     cp -r ~/dotfiles/nvim ~/.config/
 fi
 
+# Add CUDA to PATH
+search_string="# 241028 Update .zshrc: add CUDA to PATH"
+if ! grep -q "$search_string" ~/.zshrc; then
+cat >> ~/.zshrc << EOF
+# 241028 Update .zshrc: add CUDA to PATH
+########################
+export PATH=\$PATH:/usr/local/cuda/bin
+export LD_LIBRARY_PATH=\${LD_LIBRARY_PATH:+\$LD_LIBRARY_PATH:}/usr/local/cuda/lib64
+########################
+EOF
+fi
