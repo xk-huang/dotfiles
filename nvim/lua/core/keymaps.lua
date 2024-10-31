@@ -32,3 +32,10 @@ keymap.set("n", "<leader>e", ":NvimTreeToggle<CR>")
 keymap.set("n", "<leader>l", ":bnext<CR>")
 keymap.set("n", "<leader>h", ":bprevious<CR>")
 
+-- Move to line front / end
+keymap.set('n', 'H', '^', { noremap = true })
+keymap.set('n', 'L', '$', { noremap = true })
+
+-- Close buffer
+keymap.set('n', '<leader>bd', ':bd<CR>', { noremap = true, silent = true })
+
