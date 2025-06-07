@@ -49,6 +49,7 @@ cat >> ~/.zshrc << EOF
 alias a3='conda activate'
 alias c3='conda'
 alias sc='source'
+alias gs='gpustat'
 
 export VISUAL=vim
 export EDITOR="\$VISUAL"
