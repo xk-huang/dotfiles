@@ -85,9 +85,14 @@ dpkg-deb -x git-delta_0.18.2_amd64.deb ~/local
 rm git-delta_0.18.2_amd64.deb
 
 # Download .tmux.conf
-if [[ ! -f ~/.tmux.conf ]]; then
-        curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/tmux/.tmux.conf -o - >> ~/.tmux.conf
-    fi
+# if [[ ! -f ~/.tmux.conf ]]; then
+search_string="# 250714 Update .tmux.conf"
+if ! grep -q "$search_string" ~/.tmux.conf; then
+cat >> ~/.tmux.conf << EOF
+# 250714 Update .tmux.conf
+EOF
+curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/tmux/.tmux.conf -o - >> ~/.tmux.conf
+fi
 
 # Download .gitconfig
 if [[ ! -f ~/.gitconfig ]]; then
