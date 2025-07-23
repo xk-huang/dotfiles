@@ -60,6 +60,25 @@ export PATH="\$PATH:\$HOME/local/usr/bin"
 # To customize prompt, run "p10k configure" or edit ~/.p10k.zsh.
 
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# load dotenv file
+function load_dotenv() {
+    if [[ -f $1 ]]; then
+        echo "Found dotenv file at $1.\nLoading environment variables from it."
+        set -a
+        source $1
+        set +a
+    else
+        echo "No dotenv file found at: $1"
+    fi
+}
+alias lde="load_dotenv"
+
+if [[ -f .env ]]; then
+    load_dotenv .env
+else
+    echo "No dotenv file found."
+fi
 ########################
 EOF
 fi
