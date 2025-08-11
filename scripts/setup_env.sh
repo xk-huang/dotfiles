@@ -63,13 +63,13 @@ export PATH="\$PATH:\$HOME/local/usr/bin"
 
 # load dotenv file
 function load_dotenv() {
-    if [[ -f $1 ]]; then
-        echo "Found dotenv file at $1.\nLoading environment variables from it."
+    if [[ -f \$1 ]]; then
+        echo "Found dotenv file at \$1.\nLoading environment variables from it."
         set -a
-        source $1
+        source \$1
         set +a
     else
-        echo "No dotenv file found at: $1"
+        echo "No dotenv file found at: \$1"
     fi
 }
 alias lde="load_dotenv"
