@@ -16,7 +16,7 @@ fi
 
 # Install git-delta for better diff
 # Install older version. See https://github.com/xk-huang/dotfiles/blob/main/git/.gitconfig
-if ! command -v delta; then
+if [[ -z "$SKIP_DELTA" ]] && ! command -v delta; then
     curl -L -o /tmp/git-delta-musl_0.15.1_amd64.deb https://github.com/dandavison/delta/releases/download/0.15.1/git-delta-musl_0.15.1_amd64.deb 
     if ! command -v sudo; then
         dpkg -i /tmp/git-delta-musl_0.15.1_amd64.deb
