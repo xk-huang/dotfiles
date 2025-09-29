@@ -17,7 +17,7 @@ fi
 # Install git-delta for better diff
 # Install older version. See https://github.com/xk-huang/dotfiles/blob/main/git/.gitconfig
 if [[ -z "$SKIP_DELTA" ]] && ! command -v delta; then
-    curl -L -o /tmp/git-delta-musl_0.15.1_amd64.deb https://github.com/dandavison/delta/releases/download/0.15.1/git-delta-musl_0.15.1_amd64.deb 
+    curl -L -o /tmp/git-delta-musl_0.15.1_amd64.deb https://github.com/dandavison/delta/releases/download/0.15.1/git-delta-musl_0.15.1_amd64.deb
     if ! command -v sudo; then
         dpkg -i /tmp/git-delta-musl_0.15.1_amd64.deb
     else
@@ -29,16 +29,23 @@ fi
 # Download oh-my-zsh
 yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
-# Replace them to p10k
-cp ~/.zshrc ~/.zshrc."$(date +"%y%m%d-%H%M%S")".bak
-sed -i 's/^ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
+# Download p10k and other plugins
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-
-# Replace plugins=(git) to my custom plugins
-sed -i.bak 's/^plugins=(\(.*\))/plugins=(git zsh-autosuggestions zsh-syntax-highlighting z alias-tips aliases ag history tmux)/' ~/.zshrc
 git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
 git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 git clone --depth=1 https://github.com/djui/alias-tips.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/alias-tips
+
+if [[ -n "$ONLY_DOWNLOAD" ]]; then
+    echo "Only download, not install"
+    exit 0
+fi
+
+# Replace them to p10k
+cp ~/.zshrc ~/.zshrc."$(date +"%y%m%d-%H%M%S")".bak
+sed -i 's/^ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
+
+# Replace plugins=(git) to my custom plugins
+sed -i.bak 's/^plugins=(\(.*\))/plugins=(git zsh-autosuggestions zsh-syntax-highlighting z alias-tips aliases ag history tmux)/' ~/.zshrc
 
 # Add custom config for .zshrc. Mind the escaped $ and `.
 search_string="# 240407 Update .zshrc"
