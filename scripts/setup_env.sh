@@ -35,6 +35,38 @@ git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTO
 git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 git clone --depth=1 https://github.com/djui/alias-tips.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/alias-tips
 
+# Install delta-pager
+wget https://github.com/dandavison/delta/releases/download/0.18.2/git-delta_0.18.2_amd64.deb
+dpkg-deb -x git-delta_0.18.2_amd64.deb ~/local
+rm git-delta_0.18.2_amd64.deb
+
+# Download .tmux.conf
+# if [[ ! -f ~/.tmux.conf ]]; then
+search_string="# 250714 Update .tmux.conf"
+if ! grep -q "$search_string" ~/.tmux.conf; then
+cat >> ~/.tmux.conf << EOF
+# 250714 Update .tmux.conf
+EOF
+curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/tmux/.tmux.conf -o - >> ~/.tmux.conf
+fi
+
+# Download .gitconfig
+if [[ ! -f ~/.gitconfig ]]; then
+    curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/git/.gitconfig -o - >> ~/.gitconfig
+fi
+
+# Download .p10k.zsh
+if [[ ! -f ~/.p10k.zsh ]]; then
+    curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/p10k/.p10k.zsh -o - >> ~/.p10k.zsh
+fi
+
+git clone git@github.com:xk-huang/dotfiles.git ~/dotfiles
+
+if [[ ! -d ~/.config/nvim ]]; then
+    mkdir -p ~/.config/
+    cp -r ~/dotfiles/nvim ~/.config/
+fi
+
 if [[ -n "$ONLY_DOWNLOAD" ]]; then
     echo "Only download, not install"
     exit 0
@@ -103,38 +135,6 @@ export SHELL=$(which zsh)
 exec $(which zsh) -l
 ###############################
 EOF
-fi
-
-# Install delta-pager
-wget https://github.com/dandavison/delta/releases/download/0.18.2/git-delta_0.18.2_amd64.deb
-dpkg-deb -x git-delta_0.18.2_amd64.deb ~/local
-rm git-delta_0.18.2_amd64.deb
-
-# Download .tmux.conf
-# if [[ ! -f ~/.tmux.conf ]]; then
-search_string="# 250714 Update .tmux.conf"
-if ! grep -q "$search_string" ~/.tmux.conf; then
-cat >> ~/.tmux.conf << EOF
-# 250714 Update .tmux.conf
-EOF
-curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/tmux/.tmux.conf -o - >> ~/.tmux.conf
-fi
-
-# Download .gitconfig
-if [[ ! -f ~/.gitconfig ]]; then
-    curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/git/.gitconfig -o - >> ~/.gitconfig
-fi
-
-# Download .p10k.zsh
-if [[ ! -f ~/.p10k.zsh ]]; then
-    curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/p10k/.p10k.zsh -o - >> ~/.p10k.zsh
-fi
-
-git clone git@github.com:xk-huang/dotfiles.git ~/dotfiles
-
-if [[ ! -d ~/.config/nvim ]]; then
-    mkdir -p ~/.config/
-    cp -r ~/dotfiles/nvim ~/.config/
 fi
 
 # Add CUDA to PATH
