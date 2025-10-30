@@ -125,17 +125,18 @@ fi
 # Change .bash_profile, change default shell to zsh without root permit
 # https://unix.stackexchange.com/questions/136423/making-zsh-default-shell-without-root-access
 
-[[ ! -f ~/.bash_profile ]] || cp ~/.bash_profile ~/.bash_profile."$(date +"%y%m%d-%H%M%S")".bak
-search_string="# 240407 Update .bash_profile"
-if [[ ! -f ~/.bash_profile ]] || ! grep -q "$search_string" ~/.bash_profile; then
-cat >> ~/.bash_profile <<EOF
-# 240407 Update .bash_profile
-###############################
-export SHELL=$(which zsh)
-exec $(which zsh) -l
-###############################
-EOF
-fi
+# Remove. It will cause `bash -lc pwd` prints no outputs, which annoys codex.
+# [[ ! -f ~/.bash_profile ]] || cp ~/.bash_profile ~/.bash_profile."$(date +"%y%m%d-%H%M%S")".bak
+# search_string="# 240407 Update .bash_profile"
+# if [[ ! -f ~/.bash_profile ]] || ! grep -q "$search_string" ~/.bash_profile; then
+# cat >> ~/.bash_profile <<EOF
+# # 240407 Update .bash_profile
+# ###############################
+# export SHELL=$(which zsh)
+# exec $(which zsh) -l
+# ###############################
+# EOF
+# fi
 
 # Add CUDA to PATH
 search_string="# 241028 Update .zshrc: add CUDA to PATH"
