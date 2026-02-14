@@ -1,7 +1,7 @@
 #! /bin/bash
 
 if [[ ! -d ~/dotfiles ]]; then
-    git clone git@github.com:xk-huang/dotfiles.git ~/dotfiles
+    git clone git clone https://github.com/xk-huang/dotfiles.git ~/dotfiles
 fi
 cd ~/dotfiles
 git pull --rebase --abort-on-conflict
