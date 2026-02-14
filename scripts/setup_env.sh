@@ -60,7 +60,7 @@ if [[ ! -f ~/.p10k.zsh ]]; then
     curl -L https://raw.githubusercontent.com/xk-huang/dotfiles/main/p10k/.p10k.zsh -o - >> ~/.p10k.zsh
 fi
 
-git clone git@github.com:xk-huang/dotfiles.git ~/dotfiles
+git clone https://github.com/xk-huang/dotfiles.git ~/dotfiles
 
 if [[ ! -d ~/.config/nvim ]]; then
     mkdir -p ~/.config/
