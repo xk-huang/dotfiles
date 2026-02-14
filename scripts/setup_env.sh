@@ -78,7 +78,7 @@ cp ~/.zshrc ~/.zshrc."$(date +"%y%m%d-%H%M%S")".bak
 sed -i 's/^ZSH_THEME=.*/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
 
 # Replace plugins=(git) to my custom plugins
-sed -i.bak 's/^plugins=(\(.*\))/plugins=(git zsh-autosuggestions zsh-syntax-highlighting z alias-tips aliases history tmux)/' ~/.zshrc
+sed -i.bak 's/^plugins=(\(.*\))/plugins=(git zsh-autosuggestions zsh-syntax-highlighting alias-tips aliases history tmux)/' ~/.zshrc
 
 # Add custom config for .zshrc. Mind the escaped $ and `.
 search_string="# 240407 Update .zshrc"
