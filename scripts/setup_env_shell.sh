@@ -208,7 +208,11 @@ main() {
   require_cmd git
   require_cmd curl
 
-  bash "$SCRIPT_DIR/setup_env_tools.sh"
+  if [[ -f "$SCRIPT_DIR/setup_env_tools.sh" ]]; then
+    bash "$SCRIPT_DIR/setup_env_tools.sh"
+  else
+    bash <(curl -fsSL https://raw.githubusercontent.com/xk-huang/dotfiles/main/scripts/setup_env_tools.sh)
+  fi
 
   install_oh_my_zsh
   install_shell_plugins
