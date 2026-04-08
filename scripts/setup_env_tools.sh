@@ -22,17 +22,15 @@ TOOLS=(
   sd
   hyperfine
   tldr
-  neovim
   yazi
   unzip
   jq
   iotop
   speedtest-cli
-  tmux
-  zsh
   vim
   shellcheck
   uv
+  htop
 )
 
 log() {
