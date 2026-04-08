@@ -29,8 +29,8 @@ TOOLS=(
   speedtest-cli
   vim
   shellcheck
-  uv
   htop
+  ffmpeg
 )
 
 log() {
