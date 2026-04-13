@@ -5,6 +5,7 @@ set -euo pipefail
 BASE_DIR="${BASE_DIR:-$HOME}"
 MINICONDA_DIR="${MINICONDA_DIR:-$BASE_DIR/miniconda3}"
 TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$BASE_DIR/conda-usr}"
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 INSTALLER_DIR="${INSTALLER_DIR:-/tmp}"
 
 TOOLS=(
@@ -126,6 +127,51 @@ install_uv() {
   curl -LsSf https://astral.sh/uv/install.sh | sh
 }
 
+install_nvm() {
+  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    log "nvm already installed at $NVM_DIR"
+    return
+  fi
+
+  require_cmd curl
+
+  log "Installing nvm to $NVM_DIR"
+  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | NVM_DIR="$NVM_DIR" PROFILE=/dev/null bash
+}
+
+load_nvm() {
+  if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+    log "Cannot find nvm init script at $NVM_DIR/nvm.sh"
+    exit 1
+  fi
+
+  export NVM_DIR
+  # shellcheck disable=SC1090
+  source "$NVM_DIR/nvm.sh"
+}
+
+install_node() {
+  load_nvm
+
+  log "Installing Node.js LTS via nvm"
+  nvm install --lts
+  nvm alias default 'lts/*'
+  nvm use --lts
+}
+
+install_codex() {
+  load_nvm
+  nvm use --lts
+
+  if command -v codex >/dev/null 2>&1; then
+    log "codex already installed"
+    return
+  fi
+
+  log "Installing Codex CLI"
+  npm install -g @openai/codex
+}
+
 append_if_missing() {
   local target_file="$1"
   local marker="$2"
@@ -194,6 +240,9 @@ main() {
   activate_tools_env
   install_tools
   install_uv
+  install_nvm
+  install_node
+  install_codex
   update_shell_path
 
   log "Setup complete. Current tool environment: $TOOLS_ENV_DIR"

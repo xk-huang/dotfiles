@@ -175,6 +175,18 @@ fi
 ########################
 EOF
 )"
+
+  append_if_missing "$zshrc" "# 260413 nvm setup" "$(cat <<'EOF'
+# 260413 nvm setup
+########################
+export NVM_DIR="$HOME/.nvm"
+
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    source "$NVM_DIR/nvm.sh"
+fi
+########################
+EOF
+)"
 }
 
 install_shell_plugins() {
