@@ -114,6 +114,18 @@ install_tools() {
   conda install -c conda-forge -y "${TOOLS[@]}"
 }
 
+install_uv() {
+  if command -v uv >/dev/null 2>&1; then
+    log "uv already installed"
+    return
+  fi
+
+  require_cmd curl
+
+  log "Installing uv"
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+}
+
 append_if_missing() {
   local target_file="$1"
   local marker="$2"
@@ -181,6 +193,7 @@ main() {
   ensure_tools_env
   activate_tools_env
   install_tools
+  install_uv
   update_shell_path
 
   log "Setup complete. Current tool environment: $TOOLS_ENV_DIR"
