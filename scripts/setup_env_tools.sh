@@ -9,7 +9,6 @@ INSTALLER_DIR="${INSTALLER_DIR:-/tmp}"
 
 TOOLS=(
   gpustat
-  codex
   ncdu
   ripgrep
   fd-find
@@ -30,7 +29,6 @@ TOOLS=(
   vim
   shellcheck
   htop
-  ffmpeg
 )
 
 log() {
