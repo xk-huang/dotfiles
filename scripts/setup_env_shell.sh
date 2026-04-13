@@ -6,6 +6,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 OH_MY_ZSH_DIR="${ZSH:-$HOME/.oh-my-zsh}"
 ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$OH_MY_ZSH_DIR/custom}"
+TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$HOME/conda-usr}"
+NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 
 log() {
   printf '[setup_env_shell] %s\n' "$*"
@@ -18,20 +20,60 @@ require_cmd() {
   fi
 }
 
-append_if_missing() {
+upsert_managed_block() {
   local target_file="$1"
   local marker="$2"
   local block="$3"
+  local temp_file
+
+  temp_file="$(mktemp)"
 
   mkdir -p "$(dirname "$target_file")"
   touch "$target_file"
 
   if grep -Fq "$marker" "$target_file"; then
-    log "Block already present in $target_file"
+    awk -v marker="$marker" -v block="$block" '
+      BEGIN {
+        block_printed = 0
+        replacing = 0
+        hashes_seen = 0
+      }
+      $0 == marker {
+        if (!block_printed) {
+          print block
+          block_printed = 1
+        }
+        replacing = 1
+        hashes_seen = 0
+        next
+      }
+      replacing {
+        if ($0 == "########################") {
+          hashes_seen++
+          if (hashes_seen == 2) {
+            replacing = 0
+          }
+        }
+        next
+      }
+      { print }
+      END {
+        if (!block_printed) {
+          if (NR > 0) {
+            print ""
+          }
+          print block
+        }
+      }
+    ' "$target_file" > "$temp_file"
+    mv "$temp_file" "$target_file"
+    log "Updated $target_file"
     return
   fi
 
-  printf '\n%s\n' "$block" >> "$target_file"
+  cat "$target_file" > "$temp_file"
+  printf '\n%s\n' "$block" >> "$temp_file"
+  mv "$temp_file" "$target_file"
   log "Updated $target_file"
 }
 
@@ -110,7 +152,7 @@ configure_zshrc() {
   sed -i.bak 's|^ZSH_THEME=.*|ZSH_THEME="powerlevel10k/powerlevel10k"|' "$zshrc"
   sed -i.bak 's/^plugins=(.*)/plugins=(git zsh-autosuggestions zsh-syntax-highlighting alias-tips aliases history tmux)/' "$zshrc"
 
-  append_if_missing "$zshrc" "# 240407 Update .zshrc" "$(cat <<'EOF'
+  upsert_managed_block "$zshrc" "# 240407 Update .zshrc" "$(cat <<'EOF'
 # 240407 Update .zshrc
 ########################
 alias a3='conda activate'
@@ -123,7 +165,7 @@ export EDITOR="$VISUAL"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/local/usr/bin"
 
-export PATH="$PATH:$HOME/conda-usr/bin"
+export PATH="$PATH:$TOOLS_ENV_DIR/bin"
 
 export PATH="$PATH:/usr/local/cuda/bin"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/cuda/lib64"
@@ -150,7 +192,7 @@ fi
 EOF
 )"
 
-  append_if_missing "$zshrc" "# 250407 setup_env_shell extras" "$(cat <<'EOF'
+  upsert_managed_block "$zshrc" "# 250407 setup_env_shell extras" "$(cat <<'EOF'
 # 250407 setup_env_shell extras
 ########################
 if command -v zoxide >/dev/null 2>&1; then
@@ -176,13 +218,17 @@ fi
 EOF
 )"
 
-  append_if_missing "$zshrc" "# 260413 nvm setup" "$(cat <<'EOF'
+  upsert_managed_block "$zshrc" "# 260413 nvm setup" "$(cat <<'EOF'
 # 260413 nvm setup
 ########################
-export NVM_DIR="$HOME/.nvm"
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 
 if [[ -s "$NVM_DIR/nvm.sh" ]]; then
     source "$NVM_DIR/nvm.sh"
+fi
+
+if [[ -s "$NVM_DIR/bash_completion" ]]; then
+    source "$NVM_DIR/bash_completion"
 fi
 ########################
 EOF

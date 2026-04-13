@@ -6,6 +6,7 @@ BASE_DIR="${BASE_DIR:-$HOME}"
 MINICONDA_DIR="${MINICONDA_DIR:-$BASE_DIR/miniconda3}"
 TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$BASE_DIR/conda-usr}"
 NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+NODE_VERSION="${NODE_VERSION:-lts/*}"
 INSTALLER_DIR="${INSTALLER_DIR:-/tmp}"
 
 TOOLS=(
@@ -136,7 +137,7 @@ install_nvm() {
   require_cmd curl
 
   log "Installing nvm to $NVM_DIR"
-  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | NVM_DIR="$NVM_DIR" PROFILE=/dev/null bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | NVM_DIR="$NVM_DIR" PROFILE=/dev/null bash
 }
 
 load_nvm() {
@@ -150,18 +151,21 @@ load_nvm() {
   source "$NVM_DIR/nvm.sh"
 }
 
-install_node() {
+use_node_version() {
   load_nvm
 
-  log "Installing Node.js LTS via nvm"
-  nvm install --lts
-  nvm alias default 'lts/*'
-  nvm use --lts
+  log "Installing Node.js $NODE_VERSION via nvm"
+  nvm install "$NODE_VERSION"
+  nvm alias default "$NODE_VERSION"
+  nvm use default
+}
+
+install_node() {
+  use_node_version
 }
 
 install_codex() {
-  load_nvm
-  nvm use --lts
+  use_node_version
 
   if command -v codex >/dev/null 2>&1; then
     log "codex already installed"
@@ -170,61 +174,6 @@ install_codex() {
 
   log "Installing Codex CLI"
   npm install -g @openai/codex
-}
-
-append_if_missing() {
-  local target_file="$1"
-  local marker="$2"
-  local block="$3"
-
-  mkdir -p "$(dirname "$target_file")"
-  touch "$target_file"
-
-  if grep -Fq "$marker" "$target_file"; then
-    log "Profile already updated: $target_file"
-    return
-  fi
-
-  printf '\n%s\n' "$block" >> "$target_file"
-  log "Updated profile: $target_file"
-}
-
-update_shell_path() {
-  local marker="# setup_env_tools PATH"
-  local zsh_block bash_block fish_block
-
-  zsh_block=$(cat <<EOF
-$marker
-export PATH="$TOOLS_ENV_DIR/bin:\$PATH"
-EOF
-)
-
-  bash_block=$(cat <<EOF
-$marker
-export PATH="$TOOLS_ENV_DIR/bin:\$PATH"
-EOF
-)
-
-  fish_block=$(cat <<EOF
-$marker
-fish_add_path "$TOOLS_ENV_DIR/bin"
-EOF
-)
-
-  case "${SHELL:-}" in
-    *zsh*)
-      append_if_missing "$HOME/.zshrc" "$marker" "$zsh_block"
-      ;;
-    *bash*)
-      append_if_missing "$HOME/.bashrc" "$marker" "$bash_block"
-      ;;
-    *fish*)
-      append_if_missing "$HOME/.config/fish/config.fish" "$marker" "$fish_block"
-      ;;
-    *)
-      log "Unsupported shell: ${SHELL:-unknown}. Add $TOOLS_ENV_DIR/bin to PATH manually."
-      ;;
-  esac
 }
 
 main() {
@@ -243,7 +192,6 @@ main() {
   install_nvm
   install_node
   install_codex
-  update_shell_path
 
   log "Setup complete. Current tool environment: $TOOLS_ENV_DIR"
 }
