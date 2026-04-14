@@ -116,7 +116,7 @@ install_oh_my_zsh() {
   fi
 
   log "Installing Oh My Zsh"
-  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c \
+  yes | RUNZSH=no CHSH=yes KEEP_ZSHRC=no sh -c \
     "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 }
 
