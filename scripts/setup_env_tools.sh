@@ -31,6 +31,7 @@ TOOLS=(
   vim
   shellcheck
   htop
+  fio
 )
 
 log() {
