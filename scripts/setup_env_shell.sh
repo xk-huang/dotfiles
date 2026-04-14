@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 OH_MY_ZSH_DIR="${ZSH:-$HOME/.oh-my-zsh}"
 ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$OH_MY_ZSH_DIR/custom}"
-TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$HOME/conda-usr}"
+# TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$HOME/conda-usr}"
 NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 
 log() {
@@ -116,8 +116,18 @@ install_oh_my_zsh() {
   fi
 
   log "Installing Oh My Zsh"
-  yes | RUNZSH=no CHSH=yes KEEP_ZSHRC=no sh -c \
+  # if ~/.zshrc already exists, we back it up to ~/.zshrc.pre-oh-my-zsh 
+  # to avoid 141 exit code due to pipe failure with "yes |"
+  if [[ -f "$HOME/.zshrc" ]]; then
+    mv "$HOME/.zshrc" "$HOME/.zshrc.pre-oh-my-zsh.$(date +'%y%m%d-%H%M%S').bak"
+    log "Manually backed up existing ~/.zshrc to ~/.zshrc.pre-oh-my-zsh.$(date +'%y%m%d-%H%M%S').bak"
+  else
+    log "No existing ~/.zshrc found, skipping backup"
+  fi
+
+  RUNZSH=no CHSH=no KEEP_ZSHRC=no sh -c \
     "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  log "Installed Oh My Zsh into $OH_MY_ZSH_DIR"
 }
 
 update_tmux_conf() {
@@ -165,7 +175,7 @@ export EDITOR="$VISUAL"
 export PATH="$PATH:$HOME/.local/bin"
 export PATH="$PATH:$HOME/local/usr/bin"
 
-export PATH="$PATH:$TOOLS_ENV_DIR/bin"
+export PATH="$PATH:$HOME/conda-usr/bin"
 
 export PATH="$PATH:/usr/local/cuda/bin"
 export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/cuda/lib64"
@@ -266,10 +276,13 @@ main() {
   require_cmd git
   require_cmd curl
 
-  if [[ -f "$SCRIPT_DIR/setup_env_tools.sh" ]]; then
-    bash "$SCRIPT_DIR/setup_env_tools.sh"
-  else
-    bash <(curl -fsSL https://raw.githubusercontent.com/xk-huang/dotfiles/main/scripts/setup_env_tools.sh)
+  # if SKIP_TOOLS_INSTALL is set, we assume the user has already installed the tools and just want to set up the shell config
+  if [[ -z "${SKIP_TOOLS_INSTALL:-}" ]]; then
+    if [[ -f "$SCRIPT_DIR/setup_env_tools.sh" ]]; then
+        bash "$SCRIPT_DIR/setup_env_tools.sh"
+    else
+        bash <(curl -fsSL https://raw.githubusercontent.com/xk-huang/dotfiles/main/scripts/setup_env_tools.sh)
+    fi
   fi
 
   install_oh_my_zsh
