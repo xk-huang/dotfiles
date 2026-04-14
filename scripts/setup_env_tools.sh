@@ -79,7 +79,7 @@ install_miniconda() {
   wget -q --show-progress "https://repo.anaconda.com/miniconda/${installer}" -O "$installer_path"
 
   log "Installing Miniconda to $MINICONDA_DIR"
-  bash "$installer_path" -b -p "$MINICONDA_DIR"
+  bash "$installer_path" -b -u -p "$MINICONDA_DIR"
 }
 
 init_conda() {
