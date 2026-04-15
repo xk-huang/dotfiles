@@ -34,7 +34,7 @@ TOOLS=(
   fio
   ffmpeg
   zsh
-  tmux
+  tmux=3.5
   ncurses
 )
 
