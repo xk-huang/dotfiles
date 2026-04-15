@@ -32,6 +32,10 @@ TOOLS=(
   shellcheck
   htop
   fio
+  ffmpeg
+  zsh
+  tmux
+  ncurses
 )
 
 log() {
