@@ -178,7 +178,7 @@ export PATH="$PATH:$HOME/local/usr/bin"
 export PATH="$PATH:$HOME/conda-usr/bin"
 
 export PATH="$PATH:/usr/local/cuda/bin"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/cuda/lib64"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/cuda/lib64:/$HOME/conda-usr/lib"
 
 # To customize prompt, run "p10k configure" or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
