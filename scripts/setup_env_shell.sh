@@ -175,10 +175,15 @@ export EDITOR="$VISUAL"
 export PATH="${PATH:+$PATH:}$HOME/.local/bin"
 export PATH="${PATH:+$PATH:}$HOME/local/usr/bin"
 
-export PATH="${PATH:+$PATH:}$HOME/conda-usr/bin"
-
 export PATH="${PATH:+$PATH:}/usr/local/cuda/bin"
-export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/cuda/lib64:/$HOME/conda-usr/lib"
+export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}/usr/local/cuda/lib64"
+
+if [[ -d "$HOME/miniconda3" ]]; then
+  source "$HOME/miniconda3/etc/profile.d/conda.sh"
+  conda activate $HOME/conda-usr
+else
+  echo "No miniconda3 installation found at $HOME/miniconda3; skipping conda initialization"
+fi
 
 # To customize prompt, run "p10k configure" or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
