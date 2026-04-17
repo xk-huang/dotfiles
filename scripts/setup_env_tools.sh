@@ -36,6 +36,7 @@ TOOLS=(
   zsh
   tmux=3.5
   ncurses
+  gh
 )
 
 log() {
