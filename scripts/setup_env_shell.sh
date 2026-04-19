@@ -6,7 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOTFILES_DIR="${DOTFILES_DIR:-$HOME/dotfiles}"
 OH_MY_ZSH_DIR="${ZSH:-$HOME/.oh-my-zsh}"
 ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$OH_MY_ZSH_DIR/custom}"
-# TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$HOME/conda-usr}"
+BASE_DIR="${BASE_DIR:-$HOME}"
+MINICONDA_DIR="${MINICONDA_DIR:-$BASE_DIR/miniconda3}"
+TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$HOME/conda-usr}"
 NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
 
 log() {
@@ -277,6 +279,30 @@ setup_dotfiles_repo() {
   fi
 }
 
+init_conda() {
+  if [[ ! -f "$MINICONDA_DIR/etc/profile.d/conda.sh" ]]; then
+    log "Cannot find conda init script at $MINICONDA_DIR/etc/profile.d/conda.sh"
+    exit 1
+  fi
+
+  # shellcheck disable=SC1091
+  source "$MINICONDA_DIR/etc/profile.d/conda.sh"
+}
+
+ensure_tools_env() {
+  if [[ -d "$TOOLS_ENV_DIR" ]]; then
+    log "Tool environment already exists at $TOOLS_ENV_DIR"
+    return
+  fi
+
+  log "Creating tool environment at $TOOLS_ENV_DIR"
+  conda create -p "$TOOLS_ENV_DIR" python=3.12 -y
+}
+
+activate_tools_env() {
+  conda activate "$TOOLS_ENV_DIR"
+}
+
 main() {
   require_cmd git
   require_cmd curl
@@ -289,6 +315,11 @@ main() {
         bash <(curl -fsSL https://raw.githubusercontent.com/xk-huang/dotfiles/main/scripts/setup_env_tools.sh)
     fi
   fi
+  
+  # Make sure conda-usr is in path and lib path
+  init_conda
+  ensure_tools_env
+  activate_tools_env
 
   install_oh_my_zsh
   install_shell_plugins
