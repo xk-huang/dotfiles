@@ -37,6 +37,7 @@ TOOLS=(
   tmux=3.5
   ncurses
   gh
+  fio
 )
 
 log() {
