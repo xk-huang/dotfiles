@@ -152,7 +152,13 @@ install_nvm() {
   require_cmd curl
 
   log "Installing nvm to $NVM_DIR"
+  mkdir -p "$NVM_DIR"
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | NVM_DIR="$NVM_DIR" PROFILE=/dev/null bash
+
+  if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+    log "Cannot find nvm init script at $NVM_DIR/nvm.sh after install"
+    exit 1
+  fi
 }
 
 load_nvm() {
