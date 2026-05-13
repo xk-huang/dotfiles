@@ -2,6 +2,23 @@
 
 set -euo pipefail
 
+SETUP_HOME="${SETUP_HOME:-$HOME}"
+BOOTSTRAP_HOME="${BOOTSTRAP_HOME:-$HOME}"
+BASE_DIR="${BASE_DIR:-$SETUP_HOME}"
+TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$BASE_DIR/conda-usr}"
+
+if [[ -z "${XDG_CONFIG_HOME:-}" || ( "$SETUP_HOME" != "$HOME" && "$XDG_CONFIG_HOME" == "$HOME/.config" ) ]]; then
+  XDG_CONFIG_HOME="$SETUP_HOME/.config"
+fi
+
+if [[ -z "${GIT_CONFIG_GLOBAL:-}" || ( "$SETUP_HOME" != "$HOME" && "$GIT_CONFIG_GLOBAL" == "$HOME/.gitconfig" ) ]]; then
+  GIT_CONFIG_GLOBAL="$SETUP_HOME/.gitconfig"
+fi
+
+if [[ -z "${NVM_DIR:-}" || ( "$SETUP_HOME" != "$HOME" && "$NVM_DIR" == "$HOME/.nvm" ) ]]; then
+  NVM_DIR="$SETUP_HOME/.nvm"
+fi
+
 log() {
   printf '[update_bash_to_zsh] %s\n' "$*"
 }
@@ -11,6 +28,30 @@ require_cmd() {
     log "Missing required command: $1"
     exit 1
   fi
+}
+
+shell_quote() {
+  printf '%q' "$1"
+}
+
+resolve_zsh_path() {
+  if [[ -n "${ZSH_PATH:-}" ]]; then
+    printf '%s\n' "$ZSH_PATH"
+    return
+  fi
+
+  if [[ -x "$TOOLS_ENV_DIR/bin/zsh" ]]; then
+    printf '%s\n' "$TOOLS_ENV_DIR/bin/zsh"
+    return
+  fi
+
+  if command -v zsh >/dev/null 2>&1; then
+    command -v zsh
+    return
+  fi
+
+  log "Missing required command: zsh"
+  exit 1
 }
 
 upsert_managed_block() {
@@ -105,32 +146,78 @@ try_chsh_to_zsh() {
 }
 
 configure_bashrc_fallback() {
-  local bashrc="$HOME/.bashrc"
+  local zsh_path="$1"
+  local bashrc="$BOOTSTRAP_HOME/.bashrc"
   local block
+  local git_config_q setup_home_q xdg_config_q zsh_path_q
 
-  block="$(printf '%s\n' \
-    '# 260502 switch bash to zsh' \
-    '########################' \
-    'if [[ $- == *i* ]] \' \
-    '   && [ -t 0 ] \' \
-    '   && [ -t 1 ] \' \
-    '   && command -v zsh >/dev/null 2>&1 \' \
-    '   && [ -z "${ZSH_VERSION:-}" ]; then' \
-    '    exec zsh' \
-    'fi' \
-    '########################')"
+  git_config_q="$(shell_quote "$GIT_CONFIG_GLOBAL")"
+  setup_home_q="$(shell_quote "$SETUP_HOME")"
+  xdg_config_q="$(shell_quote "$XDG_CONFIG_HOME")"
+  zsh_path_q="$(shell_quote "$zsh_path")"
+
+  block="$(cat <<EOF
+# 260502 switch bash to zsh
+########################
+export SETUP_HOME=$setup_home_q
+export ZDOTDIR=\$SETUP_HOME
+export XDG_CONFIG_HOME=$xdg_config_q
+export GIT_CONFIG_GLOBAL=$git_config_q
+
+if [[ \$- == *i* ]] \\
+   && [ -t 0 ] \\
+   && [ -t 1 ] \\
+   && [ -z "\${ZSH_VERSION:-}" ]; then
+    if [[ -x $zsh_path_q ]]; then
+        exec $zsh_path_q
+    elif command -v zsh >/dev/null 2>&1; then
+        exec zsh
+    fi
+fi
+########################
+EOF
+)"
 
   upsert_managed_block "$bashrc" "# 260502 switch bash to zsh" "$block"
 }
 
-main() {
-  require_cmd zsh
+configure_zshenv_bootstrap() {
+  local zshenv="$BOOTSTRAP_HOME/.zshenv"
+  local git_config_q nvm_dir_q setup_home_q xdg_config_q
 
+  if [[ "$SETUP_HOME" == "$BOOTSTRAP_HOME" ]]; then
+    return
+  fi
+
+  git_config_q="$(shell_quote "$GIT_CONFIG_GLOBAL")"
+  nvm_dir_q="$(shell_quote "$NVM_DIR")"
+  setup_home_q="$(shell_quote "$SETUP_HOME")"
+  xdg_config_q="$(shell_quote "$XDG_CONFIG_HOME")"
+
+  upsert_managed_block "$zshenv" "# 260513 setup_env_shell bootstrap" "$(cat <<EOF
+# 260513 setup_env_shell bootstrap
+########################
+export SETUP_HOME=$setup_home_q
+export ZDOTDIR=\$SETUP_HOME
+export XDG_CONFIG_HOME=$xdg_config_q
+export GIT_CONFIG_GLOBAL=$git_config_q
+
+if [[ -z "\${NVM_DIR:-}" ]]; then
+    export NVM_DIR=$nvm_dir_q
+fi
+########################
+EOF
+)"
+}
+
+main() {
   local zsh_path
-  zsh_path="$(command -v zsh)"
+  zsh_path="$(resolve_zsh_path)"
+
+  configure_zshenv_bootstrap
 
   if ! try_chsh_to_zsh "$zsh_path"; then
-    configure_bashrc_fallback
+    configure_bashrc_fallback "$zsh_path"
   fi
 
   log "Bash to zsh update complete"

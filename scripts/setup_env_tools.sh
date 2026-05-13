@@ -2,10 +2,16 @@
 
 set -euo pipefail
 
-BASE_DIR="${BASE_DIR:-$HOME}"
+SETUP_HOME="${SETUP_HOME:-$HOME}"
+BASE_DIR="${BASE_DIR:-$SETUP_HOME}"
 MINICONDA_DIR="${MINICONDA_DIR:-$BASE_DIR/miniconda3}"
 TOOLS_ENV_DIR="${TOOLS_ENV_DIR:-$BASE_DIR/conda-usr}"
-NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+
+if [[ -z "${NVM_DIR:-}" || ( "$SETUP_HOME" != "$HOME" && "$NVM_DIR" == "$HOME/.nvm" ) ]]; then
+  NVM_DIR="$SETUP_HOME/.nvm"
+fi
+
+UV_INSTALL_DIR="${UV_INSTALL_DIR:-$SETUP_HOME/.local/bin}"
 NODE_VERSION="${NODE_VERSION:-lts/*}"
 INSTALLER_DIR="${INSTALLER_DIR:-/tmp}"
 
@@ -83,6 +89,7 @@ install_miniconda() {
   require_cmd wget
 
   log "Downloading $installer"
+  mkdir -p "$INSTALLER_DIR"
   wget -q --show-progress "https://repo.anaconda.com/miniconda/${installer}" -O "$installer_path"
 
   log "Installing Miniconda to $MINICONDA_DIR"
@@ -124,15 +131,16 @@ install_tools() {
 }
 
 install_uv() {
-  if command -v uv >/dev/null 2>&1; then
+  if [[ -x "$UV_INSTALL_DIR/uv" ]] || command -v uv >/dev/null 2>&1; then
     log "uv already installed"
     return
   fi
 
   require_cmd curl
 
-  log "Installing uv"
-  curl -LsSf https://astral.sh/uv/install.sh | sh
+  log "Installing uv to $UV_INSTALL_DIR"
+  mkdir -p "$UV_INSTALL_DIR"
+  curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="$UV_INSTALL_DIR" UV_NO_MODIFY_PATH=1 sh
 }
 
 install_nvm() {
@@ -154,7 +162,7 @@ load_nvm() {
   fi
 
   export NVM_DIR
-  # shellcheck disable=SC1090
+  # shellcheck disable=SC1091
   source "$NVM_DIR/nvm.sh"
 }
 
