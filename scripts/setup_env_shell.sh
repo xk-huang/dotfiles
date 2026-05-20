@@ -468,14 +468,14 @@ main() {
           MINICONDA_DIR="$MINICONDA_DIR" \
           TOOLS_ENV_DIR="$TOOLS_ENV_DIR" \
           NVM_DIR="$NVM_DIR" \
-          bash "$SCRIPT_DIR/setup_env_tools.sh"
+          bash -x "$SCRIPT_DIR/setup_env_tools.sh"
     else
         SETUP_HOME="$SETUP_HOME" \
           BASE_DIR="$BASE_DIR" \
           MINICONDA_DIR="$MINICONDA_DIR" \
           TOOLS_ENV_DIR="$TOOLS_ENV_DIR" \
           NVM_DIR="$NVM_DIR" \
-          bash <(curl -fsSL https://raw.githubusercontent.com/xk-huang/dotfiles/main/scripts/setup_env_tools.sh)
+          bash -x <(curl -fsSL https://raw.githubusercontent.com/xk-huang/dotfiles/main/scripts/setup_env_tools.sh)
     fi
   fi
   
