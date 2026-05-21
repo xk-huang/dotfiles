@@ -44,6 +44,7 @@ TOOLS=(
   ncurses
   gh
   fio
+  direnv
 )
 
 log() {
