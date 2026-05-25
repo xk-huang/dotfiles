@@ -45,6 +45,8 @@ TOOLS=(
   gh
   fio
   direnv
+  git
+  make
 )
 
 log() {
