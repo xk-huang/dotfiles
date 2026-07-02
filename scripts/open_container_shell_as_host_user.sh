@@ -95,7 +95,9 @@ mkdir -p "$home_dir"
 chown "$user_uid:$user_gid" "$home_dir"
 
 install -d -m 0755 /etc/sudoers.d
-printf "%s ALL=(ALL) NOPASSWD:ALL\n" "$user_name" > "/etc/sudoers.d/90-$user_name"
-chmod 0440 "/etc/sudoers.d/90-$user_name"
+sudoers_file="/etc/sudoers.d/90-host-user-${user_uid}"
+printf "#%s ALL=(ALL) NOPASSWD: ALL\n" "$user_uid" > "$sudoers_file"
+chmod 0440 "$sudoers_file"
+visudo -cf "$sudoers_file"
 
 exec sudo -u "$user_name" -i
