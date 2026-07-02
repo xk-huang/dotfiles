@@ -268,6 +268,8 @@ export LD_LIBRARY_PATH="\${LD_LIBRARY_PATH:+\$LD_LIBRARY_PATH:}/usr/local/cuda/l
 if [[ -f $conda_init_q ]]; then
   source $conda_init_q
   conda activate $tools_env_q
+  echo "Conda initialized and activated $tools_env_q"
+  echo "To deactivate: conda deactivate"
 else
   echo "No miniconda initialization found at $conda_init_q; skipping conda initialization"
 fi
