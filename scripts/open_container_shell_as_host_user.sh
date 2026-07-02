@@ -2,17 +2,18 @@
 set -euo pipefail
 
 function usage() {
-  echo "Usage: $0 <host_user_name> <host_user_uid> <host_user_gid>"
+  echo "Usage: $0 <host_user_name> <host_user_uid> <host_user_gid> [custom_home_dir]"
   exit 1
 }
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
   usage
 fi
 
 user_name="$1"
 user_uid="$2"
 user_gid="$3"
+custom_home_dir="${4:-}"
 
 pkg_manager=""
 if command -v apt-get >/dev/null 2>&1; then
@@ -78,21 +79,35 @@ if getent passwd "$user_name" >/dev/null 2>&1; then
     echo "user $user_name already exists with gid $(id -g "$user_name"), expected $user_gid" >&2
     exit 1
   fi
+  if [ -n "$custom_home_dir" ]; then
+    usermod -d "$custom_home_dir" "$user_name"
+  fi
 else
   uid_owner="$(getent passwd "$user_uid" | cut -d: -f1 || true)"
   if [ -n "$uid_owner" ]; then
     echo "uid $user_uid is already owned by $uid_owner" >&2
     exit 1
   fi
-  useradd -m -u "$user_uid" -g "$group_name" -s /bin/bash "$user_name"
+  useradd_args=(-u "$user_uid" -g "$group_name" -s /bin/bash)
+  if [ -z "$custom_home_dir" ] || [ ! -e "$custom_home_dir" ]; then
+    useradd_args+=(-m)
+  fi
+  if [ -n "$custom_home_dir" ]; then
+    useradd_args+=(-d "$custom_home_dir")
+  fi
+  useradd "${useradd_args[@]}" "$user_name"
 fi
 
 home_dir="$(getent passwd "$user_name" | cut -d: -f6)"
 if [ -z "$home_dir" ]; then
   home_dir="/home/$user_name"
 fi
-mkdir -p "$home_dir"
-chown "$user_uid:$user_gid" "$home_dir"
+if [ -e "$home_dir" ]; then
+  echo "warning: home directory $home_dir already exists; not changing owner or permissions" >&2
+else
+  mkdir -p "$home_dir"
+  chown "$user_uid:$user_gid" "$home_dir"
+fi
 
 install -d -m 0755 /etc/sudoers.d
 sudoers_file="/etc/sudoers.d/90-host-user-${user_uid}"
