@@ -56,6 +56,7 @@ Useful variables:
 | `GIT_CONFIG_GLOBAL` | `$SETUP_HOME/.gitconfig` | Global git config path exported by shell setup. |
 | `ONLY_DOWNLOAD` | unset | If set, skip shell rc/bootstrap modifications. |
 | `SKIP_TOOLS_INSTALL` | unset | If set, skip running `setup_env_tools.sh`. |
+| `NO_CONDA_ACTIVATE` | unset | If set, write the `.zshrc` conda init block with automatic `conda activate` commented out. |
 
 Examples:
 
@@ -65,6 +66,9 @@ SETUP_HOME=/mnt/nfs/$USER bash scripts/setup_env_shell.sh
 
 # Configure shell files only after tools were installed separately.
 SETUP_HOME=/mnt/nfs/$USER SKIP_TOOLS_INSTALL=1 bash scripts/setup_env_shell.sh
+
+# Configure shell files without auto-activating the tools conda env in zsh.
+SETUP_HOME=/mnt/nfs/$USER NO_CONDA_ACTIVATE=1 bash scripts/setup_env_shell.sh
 
 # Download/install assets but do not touch rc files.
 SETUP_HOME=/mnt/nfs/$USER ONLY_DOWNLOAD=1 bash scripts/setup_env_shell.sh

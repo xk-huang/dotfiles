@@ -267,9 +267,7 @@ export LD_LIBRARY_PATH="\${LD_LIBRARY_PATH:+\$LD_LIBRARY_PATH:}/usr/local/cuda/l
 
 if [[ -f $conda_init_q ]]; then
   source $conda_init_q
-  conda activate $tools_env_q
-  echo "Conda initialized and activated $tools_env_q"
-  echo "To deactivate: conda deactivate"
+$(render_zshrc_conda_activation "$tools_env_q")
 else
   echo "No miniconda initialization found at $conda_init_q; skipping conda initialization"
 fi
@@ -456,6 +454,24 @@ ensure_tools_env() {
 
 activate_tools_env() {
   conda activate "$TOOLS_ENV_DIR"
+}
+
+render_zshrc_conda_activation() {
+  local tools_env_q="$1"
+
+  if [[ -n "${NO_CONDA_ACTIVATE:-}" ]]; then
+    cat <<EOF
+  # conda activate $tools_env_q
+  echo "Conda initialized; automatic activation skipped because NO_CONDA_ACTIVATE is set"
+EOF
+    return
+  fi
+
+  cat <<EOF
+  conda activate $tools_env_q
+  echo "Conda initialized and activated $tools_env_q"
+  echo "To deactivate: conda deactivate"
+EOF
 }
 
 main() {
