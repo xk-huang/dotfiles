@@ -213,9 +213,9 @@ main() {
   activate_tools_env
   install_tools
   install_uv
-  install_nvm
-  install_node
-  install_codex
+#   install_nvm
+#   install_node
+#   install_codex
 
   log "Setup complete. Current tool environment: $TOOLS_ENV_DIR"
 }
